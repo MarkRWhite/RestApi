@@ -32,9 +32,10 @@
 		/// </summary>
 		/// <param name="uri">The URI where the Rest Api should be hosted.</param>
 		/// <param name="start">Denotes if the controller should start the service immediately</param>
-		public NoteController ( string uri, bool start = false )
+		/// <param name="test">Denotes whether to run in test mode</param>
+		public NoteController ( string uri, bool start = false, bool test = false )
 		{
-			this._dataStore = new MockDataStore();
+			this._dataStore = new MockDataStore( test );
 			this._webHost = new WebServiceHost( new NoteService( this._dataStore ), new Uri( uri ) );
 
 			if ( start )

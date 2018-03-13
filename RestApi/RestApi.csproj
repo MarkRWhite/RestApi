@@ -64,6 +64,7 @@
     <Compile Include="Services\INoteService.cs" />
     <Compile Include="Services\NoteService.cs" />
     <Compile Include="Tests\MockDataStoreTests.cs" />
+    <Compile Include="Tests\ServiceTests.cs" />
     <Compile Include="Utility\CommandType.cs" />
     <Compile Include="DataStore\IDataStore.cs" />
     <Compile Include="DataStore\MockDataStore.cs" />

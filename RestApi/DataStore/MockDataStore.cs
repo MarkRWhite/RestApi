@@ -1,5 +1,6 @@
 ﻿namespace RestApi.DataStore
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -22,6 +23,11 @@
 		/// </summary>
 		private readonly object _lock = new object();
 
+		/// <summary>
+		///     A random number generator used to create test data
+		/// </summary>
+		private static readonly Random _random = new Random();
+
 		#endregion
 
 		#region Constructors
@@ -32,6 +38,24 @@
 		public MockDataStore ()
 		{
 			this._notes = new Dictionary<int, Note>();
+		}
+
+
+		/// <summary>
+		/// Test constructor for MockDataStore
+		/// </summary>
+		/// <param name="test">If the MockDataStore should generate test data</param>
+		public MockDataStore ( bool test = false )
+			: this()
+		{
+			if ( test )
+			{
+				// Generate random test Notes
+				for ( var i = 0; i < _random.Next( 0, 20 ); i++ )
+				{
+					this._notes.Add( i, new Note( true ) );
+				}
+			}
 		}
 
 		#endregion
