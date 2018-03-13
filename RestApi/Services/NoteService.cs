@@ -1,8 +1,10 @@
 ﻿namespace RestApi.Services
 {
+	using System;
 	using System.Net;
 	using System.ServiceModel;
 	using System.ServiceModel.Web;
+	using System.Text;
 
 	using Newtonsoft.Json;
 
@@ -46,18 +48,18 @@
 		public string GetNote ( string id )
 		{
 			int inputId;
-			if ( int.TryParse( id, out inputId ) )
+			if ( !int.TryParse( id, out inputId ) )
 			{
-				var resultNote = this._dataStore.GetNote( inputId );
-				if ( resultNote == null )
-				{
-					throw new WebFaultException<string>( "Note Id does not exist", HttpStatusCode.NotFound );
-				}
-
-				return SerializeJson( resultNote );
+				throw new WebFaultException<string>( "Invalid Note Id format", HttpStatusCode.BadRequest );
 			}
 
-			throw new WebFaultException<string>( "Invalid Note Id format", HttpStatusCode.BadRequest );
+			var resultNote = this._dataStore.GetNote( inputId );
+			if ( resultNote == null )
+			{
+				throw new WebFaultException<string>( "Note Id does not exist", HttpStatusCode.NotFound );
+			}
+
+			return SerializeJson( resultNote );
 		}
 
 		/// <summary>
@@ -67,6 +69,60 @@
 		public string GetNotes ()
 		{
 			return SerializeJson( this._dataStore.GetNotes() );
+		}
+
+		/// <summary>
+		///     Store a new note in the DataStore
+		/// </summary>
+		/// <returns></returns>
+		public string StoreNote ()
+		{
+			try
+			{
+				var json = Encoding.ASCII.GetString( OperationContext.Current.RequestContext.RequestMessage.GetBody<byte[]>() );
+				this._dataStore.StoreNote( DeserializeJson<Note>( json ) );
+
+				// Success
+				return string.Empty;
+			}
+			catch ( Exception ex )
+			{
+				throw new WebFaultException<string>( $"Invalid Note format. {ex.Message}", HttpStatusCode.BadRequest );
+			}
+		}
+
+		/// <summary>
+		///     Updates an existing Note in the DataStore
+		/// </summary>
+		/// <param name="id">The Id of the note to be updated</param>
+		/// <returns></returns>
+		public string UpdateNote ( string id )
+		{
+			try
+			{
+				int inputId;
+				if ( !int.TryParse( id, out inputId ) )
+				{
+					throw new WebFaultException<string>( "Invalid Note Id format", HttpStatusCode.BadRequest );
+				}
+
+				var resultNote = this._dataStore.GetNote( inputId );
+				if ( resultNote == null )
+				{
+					throw new WebFaultException<string>( "Note Id does not exist", HttpStatusCode.NotFound );
+				}
+
+				var json = Encoding.ASCII.GetString( OperationContext.Current.RequestContext.RequestMessage.GetBody<byte[]>() );
+
+				this._dataStore.UpdateNote( inputId, DeserializeJson<Note>( json ) );
+
+				// Success
+				return string.Empty;
+			}
+			catch ( Exception ex )
+			{
+				throw new WebFaultException<string>( $"Invalid Note format. {ex.Message}", HttpStatusCode.BadRequest );
+			}
 		}
 
 		#endregion
